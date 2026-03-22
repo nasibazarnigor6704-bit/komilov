@@ -1,6 +1,20 @@
+from os import environ
+
 import json
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, MessageHandler, CallbackContext, filters
+from flask import Flask
+import threading
+
+ap = Flask(__name__)
+@ap.route('/')
+def home():
+    return 'Bot is running'
+def run_flask():
+    port = int(environ.get("PORT", 5000))
+    ap.run(host="0.0.0.0", port=port)
+
+
 
 BOT_TOKEN = "8444605011:AAE0SKPtijKiSyWn4M1-o1z46dQKj8gb3YA"
 CHANNEL_ID = "@theBenhub"
@@ -70,10 +84,16 @@ async def forward_with_limit(update: Update, context: CallbackContext):
         await show_payment_menu(update, context)
 
 def main():
+ try:
+    threading.Thread(target=run_flask).start()
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(MessageHandler(filters.ALL, forward_with_limit))
     print("Bot ishga tushdi...")
     app.run_polling()
+ except Exception as exc:
+        print('error ',exc)
+
+    
 
 if __name__ == "__main__":
     main()
